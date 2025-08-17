@@ -9,7 +9,7 @@ const PageLayout = ({ children }: TPageLayoutProps) => {
   return (
     <div className="flex flex-col">
       <Header />
-      <div className="p-12">{children}</div>
+      <div className="px-12 py-10">{children}</div>
     </div>
   );
 };

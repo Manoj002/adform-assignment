@@ -1,17 +1,22 @@
-import { createSlice } from "@reduxjs/toolkit";
-import type { TCampaign, TCampaigns } from "../../global.types/campaigns.types";
-import type { TUser } from "../../global.types/users.types";
-import { formatUSD, isDateRangeValid } from "../../services/global.utils";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type {
+  TAddCampaignsParams,
+  TCampaign,
+  TCampaigns,
+} from "../../global.types/campaigns.types";
+import {
+  formatUSD,
+  isDateRangeValid,
+  usersMap,
+} from "../../services/global.utils";
 
 type TCampaignsState = {
   isLoading: boolean;
   campaigns: TCampaigns;
   filteredCampaigns: TCampaigns;
   isError: boolean;
-};
-
-type TUserMapAccumulator = {
-  [id: number]: string;
+  isAddCampaignsLoading: boolean;
+  isAddCampaignsError: boolean;
 };
 
 const initialState: TCampaignsState = {
@@ -19,6 +24,8 @@ const initialState: TCampaignsState = {
   campaigns: [],
   filteredCampaigns: [],
   isError: false,
+  isAddCampaignsLoading: false,
+  isAddCampaignsError: false,
 };
 
 const campaignSlice = createSlice({
@@ -33,18 +40,11 @@ const campaignSlice = createSlice({
     },
 
     campaignsFetchSuccess: (state, action) => {
-      const usersMap = action.payload.users.reduce(
-        (accumulator: TUserMapAccumulator, currentValue: TUser) => {
-          accumulator[currentValue.id] = currentValue.name;
-          return accumulator;
-        },
-        {}
-      );
-
       state.isLoading = false;
       state.campaigns = action.payload.campaigns.map((campaign: TCampaign) => ({
         ...campaign,
-        userName: usersMap[campaign.userId] || "Unknown user",
+        userName:
+          usersMap(action.payload.users)[campaign.userId] || "Unknown user",
         isActive: isDateRangeValid(campaign.startDate, campaign.endDate)
           ? "Active"
           : "Inactive",
@@ -68,10 +68,31 @@ const campaignSlice = createSlice({
       );
     },
 
-    addCampaign: (state, action) => {
-      state.isLoading = false;
-      state.campaigns = action.payload; // append
-      state.isError = false;
+    addCampaignsInit: (state, _action: PayloadAction<TAddCampaignsParams>) => {
+      state.isAddCampaignsLoading = true;
+      state.isAddCampaignsError = false;
+    },
+
+    addCampaignsSuccess: (state, action) => {
+      state.isAddCampaignsLoading = false;
+      state.isAddCampaignsError = false;
+      state.campaigns = [
+        ...state.campaigns,
+        ...action.payload.campaigns.map((campaign: TCampaign) => ({
+          ...campaign,
+          userName:
+            usersMap(action.payload.users)[campaign.userId] || "Unknown user",
+          isActive: isDateRangeValid(campaign.startDate, campaign.endDate)
+            ? "Active"
+            : "Inactive",
+          displayBudget: formatUSD(campaign.Budget),
+        })),
+      ];
+    },
+
+    addCampaignsError: (state) => {
+      state.isAddCampaignsLoading = false;
+      state.isAddCampaignsError = true;
     },
   },
 });
@@ -80,8 +101,10 @@ export const {
   getCampaigns,
   campaignsFetchSuccess,
   campaignsFetchError,
-  addCampaign,
+  addCampaignsInit,
   filterCampaigns,
+  addCampaignsSuccess,
+  addCampaignsError,
 } = campaignSlice.actions;
 
 export default campaignSlice.reducer;

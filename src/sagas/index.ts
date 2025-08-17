@@ -1,9 +1,16 @@
 import { takeLatest } from "redux-saga/effects";
-import { getCampaigns } from "../features/campaigns/campaignSlice";
-import campaignSaga from "../features/campaigns/campaignSaga";
+import {
+  addCampaignsInit,
+  getCampaigns,
+} from "../features/campaigns/campaignSlice";
+import {
+  addCampaignsSaga,
+  campaignSaga,
+} from "../features/campaigns/campaignSaga";
 
 function* watchers() {
   yield takeLatest(getCampaigns.type, campaignSaga);
+  yield takeLatest(addCampaignsInit.type, addCampaignsSaga);
 }
 
 export default watchers;

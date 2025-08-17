@@ -1,8 +1,17 @@
 import { call, put } from "redux-saga/effects";
 import { fetchCampaign, fetchUsers } from "../../services/apiService";
-import { campaignsFetchError, campaignsFetchSuccess } from "./campaignSlice";
-import type { TCampaigns } from "../../global.types/campaigns.types";
+import {
+  addCampaignsError,
+  addCampaignsSuccess,
+  campaignsFetchError,
+  campaignsFetchSuccess,
+} from "./campaignSlice";
+import type {
+  TAddCampaignsParams,
+  TCampaigns,
+} from "../../global.types/campaigns.types";
 import type { TUsers } from "../../global.types/users.types";
+import type { PayloadAction } from "@reduxjs/toolkit";
 
 function* campaignSaga() {
   try {
@@ -14,4 +23,17 @@ function* campaignSaga() {
   }
 }
 
-export default campaignSaga;
+function* addCampaignsSaga(action: PayloadAction<TAddCampaignsParams>) {
+  console.log({ action });
+  try {
+    const users: TUsers = yield call(fetchUsers);
+    yield put(
+      addCampaignsSuccess({ campaigns: action.payload.campaigns, users })
+    );
+  } catch (error: any) {
+    console.log({ error });
+    yield put(addCampaignsError(error.message));
+  }
+}
+
+export { campaignSaga, addCampaignsSaga };

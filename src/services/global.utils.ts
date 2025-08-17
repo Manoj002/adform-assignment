@@ -1,3 +1,9 @@
+import type {
+  TUser,
+  TUserMapAccumulator,
+  TUsers,
+} from "../global.types/users.types";
+
 export const isDateRangeValid = (startDate: string, endDate: string) => {
   const start: Date = new Date(startDate);
   const end: Date = new Date(endDate);
@@ -21,3 +27,9 @@ export const formatUSD = (amount: number, decimals = 2) => {
 
   return formatter(amount / 1_000_000_000, "B");
 };
+
+export const usersMap = (users: TUsers) =>
+  users.reduce((accumulator: TUserMapAccumulator, currentValue: TUser) => {
+    accumulator[currentValue.id] = currentValue.name;
+    return accumulator;
+  }, {});

@@ -5,3 +5,7 @@ export type TUser = {
 };
 
 export type TUsers = TUser[];
+
+export type TUserMapAccumulator = {
+  [id: number]: string;
+};
