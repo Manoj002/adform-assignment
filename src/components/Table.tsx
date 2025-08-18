@@ -56,6 +56,7 @@ export default function CampaignTable({ columns, rows }: TCampaignTableProps) {
                   value = dayjs(value, "M/D/YYYY").format("MM/DD/YYYY");
                 }
                 if (col.renderCell) {
+                  // @ts-ignore
                   value = col.renderCell(row);
                 }
                 return (

@@ -1,8 +1,10 @@
+import type { Dayjs } from "dayjs";
 import type {
   TUser,
   TUserMapAccumulator,
   TUsers,
 } from "../global.types/users.types";
+import dayjs from "dayjs";
 
 export const isDateRangeValid = (startDate: string, endDate: string) => {
   const start: Date = new Date(startDate);
@@ -33,3 +35,6 @@ export const usersMap = (users: TUsers) =>
     accumulator[currentValue.id] = currentValue.name;
     return accumulator;
   }, {});
+
+export const dateFormatter = (date: string | Dayjs): string =>
+  dayjs(date).format("MM/DD/YYYY");

@@ -6,6 +6,10 @@ export const selectCampaign = (state: RootState) => state.campaign;
 export const campaignList = createSelector([selectCampaign], (campaign) => ({
   campaigns: campaign.campaigns,
   isLoading: campaign.isLoading,
-  isError: campaign.isError,
   filteredCampaigns: campaign.filteredCampaigns,
+}));
+
+export const addCampaigns = createSelector([selectCampaign], (campaign) => ({
+  isAddCampaignsLoading: campaign.isAddCampaignsLoading,
+  isAddCampaignsSuccess: campaign.isAddCampaignsSuccess,
 }));

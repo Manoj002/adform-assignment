@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  addCampaignsInit,
   filterCampaigns,
+  filterWithDateSelection,
   getCampaigns,
 } from "./campaignSlice";
 import CampaignTable from "../../components/Table";
@@ -17,38 +17,45 @@ import {
 import type { Dayjs } from "dayjs";
 import { CircularProgress } from "@mui/material";
 import type { AppDispatch } from "../../store/store.types.ts";
+import AddCampaignsModal from "./AddCampaignsModal.tsx";
+import { dateFormatter } from "../../services/global.utils.ts";
 
 const Campaign = () => {
   const [campaignSearchValue, setCampaignSearchValue] = useState("");
+  const [shouldShowAddCampaignsModal, setShouldShowAddCampaignsModal] =
+    useState(false);
   const [startEndDateRange, setStartEndDateRange] = useState<DateRange<Dayjs>>([
     null,
     null,
   ]);
   const [isFiltered, setIsFiltered] = useState(false);
   const dispatch = useDispatch<AppDispatch>();
-  const { isLoading, campaigns, isError, filteredCampaigns } =
-    useSelector(campaignList);
+  const { isLoading, campaigns, filteredCampaigns } = useSelector(campaignList);
 
   const handleCampaignNameChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     setCampaignSearchValue(event.target.value);
-    if (!campaignSearchValue) setIsFiltered(false);
+    if (!event.target.value) setIsFiltered(false);
   };
 
   const handleAddCampaigns = () => {
+    setShouldShowAddCampaignsModal(true);
+  };
+
+  const handleDateRangeClearSelection = () => {
+    setStartEndDateRange([null, null]);
+    setIsFiltered(false);
+  };
+
+  const handleDateRangeSelection = (newDateRange: DateRange<Dayjs>) => {
+    setStartEndDateRange(newDateRange);
+    if (!newDateRange[0] || !newDateRange[1]) return;
+    setIsFiltered(true);
     dispatch(
-      addCampaignsInit({
-        campaigns: [
-          {
-            id: 11,
-            name: "New Campaign",
-            startDate: "3/6/2021",
-            endDate: "10/3/2026",
-            Budget: 505001,
-            userId: 12,
-          },
-        ],
+      filterWithDateSelection({
+        start: dateFormatter(newDateRange[0] as Dayjs),
+        end: dateFormatter(newDateRange[1] as Dayjs),
       })
     );
   };
@@ -57,6 +64,9 @@ const Campaign = () => {
     setIsFiltered(true);
     dispatch(filterCampaigns(campaignSearchValue));
   };
+
+  const handleOnAddCampaignsModalClose = () =>
+    setShouldShowAddCampaignsModal(false);
 
   const handleOnKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") handleFilterCampaigns();
@@ -84,9 +94,7 @@ const Campaign = () => {
         <div className="flex w-auto h-[40px]">
           <DateRangePickerComp
             value={startEndDateRange}
-            onChange={(newDateRange: DateRange<Dayjs>) =>
-              setStartEndDateRange(newDateRange)
-            }
+            onChange={handleDateRangeSelection}
             slotProps={{
               field: { dateSeparator: "" },
               textField: (ownerState: { position: string }) => ({
@@ -98,9 +106,20 @@ const Campaign = () => {
                   borderRadius: "0.5rem",
                 },
               }),
+              actionBar: {
+                actions: ["clear"],
+              },
             }}
             slots={{ field: MultiInputDateRangeField, size: "small" }}
           />
+          <button
+            onClick={handleDateRangeClearSelection}
+            className="px-2 h-full font-thin rounded-sm ml-4 bg-blue-500 text-white  cursor-pointer disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-100"
+            disabled={!startEndDateRange[0] || !startEndDateRange[1]}
+          >
+            CLEAR DATE
+            <span className="font-bold ml-1">X</span>
+          </button>
         </div>
 
         <div className="h-[40px]">
@@ -119,24 +138,24 @@ const Campaign = () => {
           >
             SEARCH
           </button>
+          <button
+            onClick={handleAddCampaigns}
+            className="px-4 py-2 ml-4 bg-blue-500 text-white rounded-sm font-thin cursor-pointer"
+          >
+            ADD CAMPAIGNS
+          </button>
         </div>
       </div>
-      <div className="justify-end flex mt-4">
-        <button
-          onClick={handleAddCampaigns}
-          className="px-4 py-2 bg-blue-500 text-white rounded-sm font-thin cursor-pointer"
-        >
-          ADD CAMPAIGNS
-        </button>
-      </div>
+      <div className="justify-end flex mt-4"></div>
       <div className="mt-12">
         <CampaignTable
           columns={campaignsColumnDef}
-          rows={
-            campaignSearchValue && isFiltered ? filteredCampaigns : campaigns
-          }
+          rows={isFiltered ? filteredCampaigns : campaigns}
         />
       </div>
+      {shouldShowAddCampaignsModal && (
+        <AddCampaignsModal handleOnClose={handleOnAddCampaignsModalClose} />
+      )}
     </PageLayout>
   );
 };

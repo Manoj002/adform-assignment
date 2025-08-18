@@ -1,0 +1,33 @@
+import { createSlice } from "@reduxjs/toolkit";
+
+type TSnackbar = {
+  open: boolean;
+  message: string;
+  severity: "error" | "warning" | "info" | "success";
+};
+
+const initialState: TSnackbar = {
+  open: false,
+  message: "",
+  severity: "info",
+};
+
+const snackbarSlice = createSlice({
+  name: "SNACKBAR",
+  initialState,
+  reducers: {
+    showSnackbar: (state, action) => {
+      state.open = true;
+      state.message = action.payload.message;
+      state.severity = action.payload.severity;
+    },
+    hideSnackbar: (state) => {
+      state.open = false;
+      state.message = "";
+      state.severity = "info";
+    },
+  },
+});
+
+export const { showSnackbar, hideSnackbar } = snackbarSlice.actions;
+export default snackbarSlice.reducer;
