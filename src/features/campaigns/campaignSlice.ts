@@ -31,6 +31,18 @@ const initialState: TCampaignsState = {
   isAddCampaignsError: false,
 };
 
+const formatCampaign = (
+  campaign: TCampaign,
+  users: Record<string, string>
+) => ({
+  ...campaign,
+  userName: users[campaign.userId] || "Unknown user",
+  isActive: isDateRangeValid(campaign.startDate, campaign.endDate)
+    ? "Active"
+    : "Inactive",
+  displayBudget: formatUSD(campaign.Budget),
+});
+
 const campaignSlice = createSlice({
   name: "CAMPAIGN",
   initialState,
@@ -43,18 +55,13 @@ const campaignSlice = createSlice({
     },
 
     campaignsFetchSuccess: (state, action) => {
+      const { campaigns, users } = action.payload;
+      const mappedUsers = usersMap(users);
+
       state.isLoading = false;
-      state.campaigns = action.payload.campaigns
+      state.campaigns = campaigns
         .filter((campaign: TCampaign) => campaign.endDate < campaign.startDate)
-        .map((campaign: TCampaign) => ({
-          ...campaign,
-          userName:
-            usersMap(action.payload.users)[campaign.userId] || "Unknown user",
-          isActive: isDateRangeValid(campaign.startDate, campaign.endDate)
-            ? "Active"
-            : "Inactive",
-          displayBudget: formatUSD(campaign.Budget),
-        }));
+        .map((campaign: TCampaign) => formatCampaign(campaign, mappedUsers));
       state.isError = false;
       state.filteredCampaigns = [];
     },
@@ -66,20 +73,24 @@ const campaignSlice = createSlice({
       state.filteredCampaigns = [];
     },
 
-    filterCampaigns: (state, action) => {
-      state.filteredCampaigns = state.campaigns.filter(
-        (campaign) =>
-          campaign.name.toLowerCase() === action.payload.toLowerCase()
+    filterCampaigns: (state, action: PayloadAction<string>) => {
+      const search = action.payload.toLowerCase();
+      state.filteredCampaigns = state.campaigns.filter((campaign) =>
+        campaign.name.toLowerCase().includes(search)
       );
     },
 
-    filterWithDateSelection: (state, action) => {
+    filterWithDateSelection: (
+      state,
+      action: PayloadAction<{ start: string; end: string }>
+    ) => {
+      const { start, end } = action.payload;
       state.filteredCampaigns = state.campaigns.filter(
         (campaign) =>
-          (dateFormatter(campaign.startDate) > action.payload.start &&
-            dateFormatter(campaign.startDate) < action.payload.endDate) ||
-          (dateFormatter(campaign.endDate) > action.payload.start &&
-            dateFormatter(campaign.endDate) < action.payload.end)
+          (dateFormatter(campaign.startDate) > start &&
+            dateFormatter(campaign.startDate) < end) ||
+          (dateFormatter(campaign.endDate) > start &&
+            dateFormatter(campaign.endDate) < end)
       );
     },
 
@@ -90,21 +101,17 @@ const campaignSlice = createSlice({
     },
 
     addCampaignsSuccess: (state, action) => {
+      const { campaigns, users } = action.payload;
+      const mappedUsers = usersMap(users);
+
       state.isAddCampaignsLoading = false;
       state.isAddCampaignsSuccess = true;
       state.isAddCampaignsError = false;
-      state.campaigns = [
-        ...state.campaigns,
-        ...action.payload.campaigns.map((campaign: TCampaign) => ({
-          ...campaign,
-          userName:
-            usersMap(action.payload.users)[campaign.userId] || "Unknown user",
-          isActive: isDateRangeValid(campaign.startDate, campaign.endDate)
-            ? "Active"
-            : "Inactive",
-          displayBudget: formatUSD(campaign.Budget),
-        })),
-      ];
+      state.campaigns.push(
+        ...campaigns.map((campaign: TCampaign) =>
+          formatCampaign(campaign, mappedUsers)
+        )
+      );
     },
 
     addCampaignsError: (state) => {
