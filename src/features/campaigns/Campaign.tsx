@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
+  addCampaignsInit,
   filterCampaigns,
   filterWithDateSelection,
   getCampaigns,
@@ -19,8 +20,14 @@ import { CircularProgress } from "@mui/material";
 import type { AppDispatch } from "../../store/store.types.ts";
 import AddCampaignsModal from "./AddCampaignsModal.tsx";
 import { dateFormatter } from "../../services/global.utils.ts";
+import type { TAddCampaignsParams } from "../../global.types/campaigns.types.ts";
+import appStore from "../../store/appStore.ts";
 
 const Campaign = () => {
+  // @ts-ignore
+  window.addCampaigns = (payload: TAddCampaignsParams) =>
+    appStore.dispatch(addCampaignsInit(payload));
+
   const dispatch = useDispatch<AppDispatch>();
   const { isLoading, campaigns, filteredCampaigns } = useSelector(campaignList);
 
@@ -96,14 +103,21 @@ const Campaign = () => {
   if (isLoading) {
     return (
       <div className="absolute inset-0 flex justify-center items-center bg-transparent">
-        <CircularProgress size={40} sx={{ color: "#2b7fff" }} />
+        <CircularProgress
+          data-testid="global-loader"
+          size={40}
+          sx={{ color: "#2b7fff" }}
+        />
       </div>
     );
   }
 
   return (
     <PageLayout>
-      <div className="w-full flex justify-between">
+      <div
+        data-testid="campaign-form-row"
+        className="w-full flex justify-between"
+      >
         <div className="flex h-[40px]">
           <DateRangePickerComp
             value={startEndDateRange}
@@ -117,7 +131,7 @@ const Campaign = () => {
                 sx: { borderRadius: "0.5rem" },
               }),
             }}
-            slots={{ field: MultiInputDateRangeField, size: "small" }}
+            slots={{ field: MultiInputDateRangeField }}
           />
           <button
             onClick={handleDateRangeClearSelection}
@@ -133,12 +147,14 @@ const Campaign = () => {
             type="text"
             name="search_campaign"
             placeholder="Search by name"
+            data-testid="search-campaigns-input"
             value={campaignSearchValue}
             onChange={handleCampaignNameChange}
             onKeyDown={handleOnKeyDown}
             className="px-2 h-full border border-black rounded-l-sm focus:outline-none focus:cursor-text"
           />
           <button
+            data-testid="search-campaigns-button"
             onClick={handleFilterCampaigns}
             disabled={!campaignSearchValue}
             className="px-2 h-full bg-blue-500 text-white rounded-r-sm font-thin cursor-pointer disabled:bg-gray-500"
@@ -146,6 +162,7 @@ const Campaign = () => {
             SEARCH
           </button>
           <button
+            role="button"
             onClick={handleAddCampaigns}
             className="px-4 py-2 ml-4 bg-blue-500 text-white rounded-sm font-thin cursor-pointer"
           >

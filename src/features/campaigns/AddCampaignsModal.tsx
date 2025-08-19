@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { CircularProgress, Modal } from "@mui/material";
 import DateRangePickerComp from "../../components/DateRangePicker";
 import {
@@ -91,7 +91,10 @@ const AddCampaignsModal = ({ handleOnClose }: TAddCampaignsModalProps) => {
 
   return (
     <Modal open onClose={handleOnClose}>
-      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-8 shadow-lg w-[400px]">
+      <div
+        data-testid="add-campaigns-content-container"
+        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg p-8 shadow-lg w-[400px]"
+      >
         <h2 className="font-bold text-lg mb-4">Add Campaign</h2>
 
         <input

@@ -5,10 +5,11 @@
     { "path": "./tsconfig.node.json" }
   ],
   "compilerOptions": {
-    "types": ["jest", "@testing-library/jest-dom"],
+    "types": ["jest", "@testing-library/jest-dom", "node"],
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "jsx": "react"
+    "jsx": "react",
+    "allowImportingTsExtensions":true,
   },
   "include": ["src/**/*", "jest.setup.ts"]
 }
