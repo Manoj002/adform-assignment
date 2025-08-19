@@ -1,3 +1,4 @@
+import React from "react";
 import type { TCampaignColDef } from "../../global.types/campaigns.types";
 
 const COLUMN_WIDTHS = {

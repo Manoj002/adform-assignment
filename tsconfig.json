@@ -7,6 +7,7 @@
   "compilerOptions": {
     "types": ["jest", "@testing-library/jest-dom"],
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "jsx": "react"
   },
   "include": ["src/**/*", "jest.setup.ts"]

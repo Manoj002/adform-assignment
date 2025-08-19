@@ -1,4 +1,4 @@
-import { type ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import Header from "./Header";
 
 type TPageLayoutProps = {
@@ -7,9 +7,14 @@ type TPageLayoutProps = {
 
 const PageLayout = ({ children }: TPageLayoutProps) => {
   return (
-    <div className="flex flex-col">
+    <div data-testid="layout-test-id" className="flex flex-col">
       <Header />
-      <div className="px-12 py-10">{children}</div>
+      <div
+        data-testid="children-wrapper-layout-test-id"
+        className="px-12 py-10"
+      >
+        {children}
+      </div>
     </div>
   );
 };
