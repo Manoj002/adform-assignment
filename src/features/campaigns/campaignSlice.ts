@@ -1,15 +1,18 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import isBetween from "dayjs/plugin/isBetween";
 import type {
   TAddCampaignsParams,
   TCampaign,
   TCampaigns,
 } from "../../global.types/campaigns.types";
 import {
-  dateFormatter,
   formatUSD,
   isDateRangeValid,
   usersMap,
 } from "../../services/global.utils";
+import dayjs from "dayjs";
+
+dayjs.extend(isBetween);
 
 type TCampaignsState = {
   isLoading: boolean;
@@ -60,7 +63,9 @@ const campaignSlice = createSlice({
 
       state.isLoading = false;
       state.campaigns = campaigns
-        .filter((campaign: TCampaign) => campaign.endDate < campaign.startDate)
+        .filter((campaign: TCampaign) =>
+          dayjs(campaign.startDate).isBefore(dayjs(campaign.endDate))
+        )
         .map((campaign: TCampaign) => formatCampaign(campaign, mappedUsers));
       state.isError = false;
       state.filteredCampaigns = [];
@@ -87,10 +92,8 @@ const campaignSlice = createSlice({
       const { start, end } = action.payload;
       state.filteredCampaigns = state.campaigns.filter(
         (campaign) =>
-          (dateFormatter(campaign.startDate) > start &&
-            dateFormatter(campaign.startDate) < end) ||
-          (dateFormatter(campaign.endDate) > start &&
-            dateFormatter(campaign.endDate) < end)
+          dayjs(start).isBetween(campaign.startDate, campaign.endDate) ||
+          dayjs(end).isBetween(campaign.startDate, campaign.endDate)
       );
     },
 

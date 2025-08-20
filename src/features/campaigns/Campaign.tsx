@@ -12,7 +12,6 @@ import PageLayout from "../../components/Layout";
 import { campaignList } from "./campaignSelectors";
 import DateRangePickerComp from "../../components/DateRangePicker";
 import {
-  MultiInputDateRangeField,
   type DateRange,
 } from "@mui/x-date-pickers-pro";
 import type { Dayjs } from "dayjs";
@@ -58,17 +57,17 @@ const Campaign = () => {
   const handleDateRangeSelection = useCallback(
     (newDateRange: DateRange<Dayjs>) => {
       setStartEndDateRange(newDateRange);
-      if (!newDateRange[0] || !newDateRange) return;
+      if (!newDateRange[0] || !newDateRange[1]) return;
 
       setIsFiltered(true);
       dispatch(
         filterWithDateSelection({
-          start: dateFormatter(newDateRange[0] as Dayjs),
-          end: dateFormatter(newDateRange[1] as Dayjs),
+          start: dateFormatter(newDateRange[0]),
+          end: dateFormatter(newDateRange[1]),
         })
       );
     },
-    [dispatch]
+    []
   );
 
   const handleDateRangeClearSelection = useCallback(() => {
@@ -93,7 +92,7 @@ const Campaign = () => {
 
   useEffect(() => {
     dispatch(getCampaigns());
-  }, [dispatch]);
+  }, []);
 
   const displayedCampaigns = useMemo(
     () => (isFiltered ? filteredCampaigns : campaigns),
@@ -131,7 +130,6 @@ const Campaign = () => {
                 sx: { borderRadius: "0.5rem" },
               }),
             }}
-            slots={{ field: MultiInputDateRangeField }}
           />
           <button
             onClick={handleDateRangeClearSelection}
@@ -157,7 +155,7 @@ const Campaign = () => {
             data-testid="search-campaigns-button"
             onClick={handleFilterCampaigns}
             disabled={!campaignSearchValue}
-            className="px-2 h-full bg-blue-500 text-white rounded-r-sm font-thin cursor-pointer disabled:bg-gray-500"
+            className="px-2 h-full bg-blue-500 text-white rounded-r-sm font-thin cursor-pointer disabled:bg-gray-500 disabled:cursor-not-allowed"
           >
             SEARCH
           </button>

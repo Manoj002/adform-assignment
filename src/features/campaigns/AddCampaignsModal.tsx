@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { CircularProgress, Modal } from "@mui/material";
 import DateRangePickerComp from "../../components/DateRangePicker";
 import {
-  MultiInputDateRangeField,
   type DateRange,
 } from "@mui/x-date-pickers-pro";
 import type { Dayjs } from "dayjs";
@@ -69,7 +68,6 @@ const AddCampaignsModal = ({ handleOnClose }: TAddCampaignsModalProps) => {
     if (!isAddCampaignsLoading && isAddCampaignsSuccess) {
       dispatch(
         showSnackbar({
-          open: true,
           message: "Campaigns added successfully!",
           severity: "success",
         })
@@ -119,7 +117,6 @@ const AddCampaignsModal = ({ handleOnClose }: TAddCampaignsModalProps) => {
               sx: { borderRadius: "0.5rem" },
             }),
           }}
-          slots={{ field: MultiInputDateRangeField, size: "small" }}
         />
 
         <input
