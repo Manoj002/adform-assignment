@@ -11,14 +11,11 @@ import { campaignsColumnDef } from "./campaign.constants.tsx";
 import PageLayout from "../../components/Layout";
 import { campaignList } from "./campaignSelectors";
 import DateRangePickerComp from "../../components/DateRangePicker";
-import {
-  type DateRange,
-} from "@mui/x-date-pickers-pro";
+import { type DateRange } from "@mui/x-date-pickers-pro";
 import type { Dayjs } from "dayjs";
 import { CircularProgress } from "@mui/material";
 import type { AppDispatch } from "../../store/store.types.ts";
 import AddCampaignsModal from "./AddCampaignsModal.tsx";
-import { dateFormatter } from "../../services/global.utils.ts";
 import type { TAddCampaignsParams } from "../../global.types/campaigns.types.ts";
 import appStore from "../../store/appStore.ts";
 
@@ -48,11 +45,11 @@ const Campaign = () => {
     []
   );
 
-  const handleFilterCampaigns = useCallback(() => {
-    if (!campaignSearchValue) return;
-    setIsFiltered(true);
-    dispatch(filterCampaigns(campaignSearchValue));
-  }, [campaignSearchValue]);
+  // const handleFilterCampaigns = useCallback(() => {
+  //   if (!campaignSearchValue) return;
+  //   setIsFiltered(true);
+  //   dispatch(filterCampaigns(campaignSearchValue));
+  // }, [campaignSearchValue]);
 
   const handleDateRangeSelection = useCallback(
     (newDateRange: DateRange<Dayjs>) => {
@@ -62,8 +59,8 @@ const Campaign = () => {
       setIsFiltered(true);
       dispatch(
         filterWithDateSelection({
-          start: dateFormatter(newDateRange[0]),
-          end: dateFormatter(newDateRange[1]),
+          start: newDateRange[0],
+          end: newDateRange[1],
         })
       );
     },
@@ -75,12 +72,12 @@ const Campaign = () => {
     setIsFiltered(false);
   }, []);
 
-  const handleOnKeyDown = useCallback(
-    (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key === "Enter") handleFilterCampaigns();
-    },
-    [handleFilterCampaigns]
-  );
+  // const handleOnKeyDown = useCallback(
+  //   (event: React.KeyboardEvent<HTMLInputElement>) => {
+  //     if (event.key === "Enter") handleFilterCampaigns();
+  //   },
+  //   [handleFilterCampaigns]
+  // );
 
   const handleAddCampaigns = useCallback(() => {
     setShouldShowAddCampaignsModal(true);
@@ -98,6 +95,20 @@ const Campaign = () => {
     () => (isFiltered ? filteredCampaigns : campaigns),
     [isFiltered, filteredCampaigns, campaigns]
   );
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (campaignSearchValue) {
+      timer = setTimeout(() => {
+        setIsFiltered(true);
+        dispatch(filterCampaigns(campaignSearchValue));
+      }, 200);
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [campaignSearchValue]);
 
   if (isLoading) {
     return (
@@ -148,17 +159,17 @@ const Campaign = () => {
             data-testid="search-campaigns-input"
             value={campaignSearchValue}
             onChange={handleCampaignNameChange}
-            onKeyDown={handleOnKeyDown}
-            className="px-2 h-full border border-black rounded-l-sm focus:outline-none focus:cursor-text"
+            // onKeyDown={handleOnKeyDown}
+            className="px-2 h-full border border-black rounded-sm focus:outline-none focus:cursor-text"
           />
-          <button
+          {/* <button
             data-testid="search-campaigns-button"
             onClick={handleFilterCampaigns}
             disabled={!campaignSearchValue}
             className="px-2 h-full bg-blue-500 text-white rounded-r-sm font-thin cursor-pointer disabled:bg-gray-500 disabled:cursor-not-allowed"
           >
             SEARCH
-          </button>
+          </button> */}
           <button
             role="button"
             onClick={handleAddCampaigns}

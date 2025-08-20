@@ -10,7 +10,7 @@ import {
   isDateRangeValid,
   usersMap,
 } from "../../services/global.utils";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 
 dayjs.extend(isBetween);
 
@@ -87,13 +87,17 @@ const campaignSlice = createSlice({
 
     filterWithDateSelection: (
       state,
-      action: PayloadAction<{ start: string; end: string }>
+      action: PayloadAction<{ start: Dayjs; end: Dayjs }>
     ) => {
       const { start, end } = action.payload;
       state.filteredCampaigns = state.campaigns.filter(
         (campaign) =>
-          dayjs(start).isBetween(campaign.startDate, campaign.endDate) ||
-          dayjs(end).isBetween(campaign.startDate, campaign.endDate)
+          dayjs(start).isSame(campaign.startDate, "date") ||
+          (dayjs(start).isAfter(campaign.startDate, "date") &&
+            dayjs(start).isBefore(campaign.endDate, "date")) ||
+          dayjs(end).isSame(campaign.endDate, "date") ||
+          (dayjs(end).isBefore(campaign.endDate, "date") &&
+            dayjs(end).isAfter(campaign.startDate, "date"))
       );
     },
 
@@ -110,11 +114,12 @@ const campaignSlice = createSlice({
       state.isAddCampaignsLoading = false;
       state.isAddCampaignsSuccess = true;
       state.isAddCampaignsError = false;
-      state.campaigns.push(
+      state.campaigns = [
+        ...state.campaigns,
         ...campaigns.map((campaign: TCampaign) =>
           formatCampaign(campaign, mappedUsers)
-        )
-      );
+        ),
+      ];
     },
 
     addCampaignsError: (state) => {
